@@ -29,7 +29,7 @@
 				</div>
 				<div class="col-md-6 top-header-left">
 					<div class="cart box_1">
-						<a href="#">
+						<a href="{% url 'carts' %}">
 							 <div class="total">
 								<span class="simpleCart_total"></span></div>
 								<img src="{% static 'images/cart-1.png' %}" alt="" />
@@ -54,8 +54,8 @@
 			<div class="header">
 				<div class="col-md-9 header-left">
 				<div class="top-nav">
-					<ul class="memenu skyblue"><li class="active"><a href="#">Home</a></li>
-						<li class="grid"><a href="#">Category</a>
+					<ul class="memenu skyblue"><li class="active"><a href="{% url 'index' %}">Home</a></li>
+						<li class="grid"><a href="{% url 'product_detail' %}">Category</a>
 							<div class="mepanel">
 								<div class="row">
 									<div class="col1 me-one">
