@@ -42,6 +42,8 @@ class Product(models.Model):
     
     @property 
     def is_discount(self):
+        if self.discount_price is None:
+            return 0
         return self.discount_price > 0
     
     @property 
@@ -65,14 +67,14 @@ class ProductReview(models.Model):
     mark = models.SmallIntegerField()
 
 
-class Card(models.Model):
+class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
 
     @property
     def quantity(self):
         quantity = 0
-        products = CardProduct.objects.filter(product_id = self.id)
+        products = CartProduct.objects.filter(product_id = self.id)
         for i in products:
             quantity +=i.quantity
         return quantity
@@ -80,18 +82,18 @@ class Card(models.Model):
     @property
     def total_price(self):
         result = 0
-        for i in CardProduct.objects.filter(card_id=self.id):
-            result +=i.price
+        for i in CartProduct.objects.filter(card_id=self.id):
+            result +=(i.product.price)*i.quantity
         return result
 
 
-class CardProduct(models.Model):
-    card = models.ForeignKey(Card, on_delete=models.CASCADE)
+class CartProduct(models.Model):
+    card = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     
     @property
-    def price(self):
+    def total_price(self):
         if self.product.is_discount:
             result = self.product.discount_price * self.quantity
         else:

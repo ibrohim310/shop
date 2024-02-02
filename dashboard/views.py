@@ -99,32 +99,38 @@ def category_delete(request, id):
 
 #product
 
-def create_product(request):
-    if request.method == 'POST':
-        name=request.POST['name']
-        description=request.POST['description']
-        quantity = request.FILES['quantity']
-        price = request.FILES['price']
-        currency = request.FILES['currency']
-        discount_price = request.FILES['discount_price']
-        category = models.Category.objects.get(id=request.POST['category_id'])
-        baner_image = request.FILES['baner_image']
 
-        models.Product.objects.create(
+
+def product_create(request):
+    categorys = models.Category.objects.all()
+    context = {
+        'categorys':categorys
+    }
+    if request.method == "POST":
+        name = request.POST['name']
+        description = request.POST['description']
+        quantity = request.POST['quantity']
+        price = request.POST['price']
+        currency = request.POST['currency']
+        baner_image = request.FILES['baner_image']
+        category_id = request.POST['category_id']
+        images = request.FILES.getlist('images')
+        product = models.Product.objects.create(
             name=name,
+            description = description,
             quantity=quantity,
             price=price,
             currency=currency,
-            discount_price=discount_price,
-            description=description,
-            category=category,
-            baner_image=baner_image
-    )
-        return redirect('items')
-    context = {
-        'categorys':models.Category.objects.all(),
-    }
-    return render(request, 'dashb/items/create.html',context)
+            baner_image=baner_image,
+            category_id=category_id
+        )
+        for image in images:
+            models.ProductImage.objects.create(
+                image=image,
+                product=product
+            )
+
+    return render(request, 'dashb/items/create.html', context)
 
 
 def products(request):
@@ -142,6 +148,7 @@ def product_update(request, id):
     if request.method == 'POST':
         category = models.Category.objects.get(id=request.POST['category_id'])
         product.name = request.POST['name']
+        product.description=request.POST['description']
         product.quantity = request.POST['quantity']
         product.price = request.POST['price']
         product.currency = request.POST['currency']

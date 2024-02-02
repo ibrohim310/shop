@@ -35,12 +35,12 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {% for item in items %}
+                                                    {% for product in products %}
                                                     <tr>
                                                         <td>{{forloop.counter}}</td>
-                                                        <td>{{item.name}}</td>
-                                                        <td><a href="{% url 'product_update' item.id %}" class="btn btn-icon  btn-success" style="color: white;"><i class="fa fa-arrow-right"></i></a></td>
-                                                        <td><a href="{% url 'product_delete' item.id %}" class="btn btn-icon  btn-danger"><i class="fe fe-trash"></i></a></td>
+                                                        <td>{{product.name}}</td>
+                                                        <td><a href="{% url 'product_update' product.id %}" class="btn btn-icon  btn-success" style="color: white;"><i class="fa fa-arrow-right"></i></a></td>
+                                                        <td><a href="{% url 'product_delete' product.id %}" class="btn btn-icon  btn-danger"><i class="fe fe-trash"></i></a></td>
                                                     </tr>
                                                     {% endfor %}
                                                 </tbody>

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from . import models
 from django.db.models import Q
 
@@ -37,3 +37,33 @@ def product_detail(request, id):
         'range':range(product.review)
     }
     return render(request, 'product/detail.html', context)
+
+
+
+
+def carts(request):
+    active = models.Cart.objects.filter(is_active=True, user=request.user)
+    in_active = models.Cart.objects.filter(is_active=False, user=request.user)
+    context = {
+        'active':active,
+        'in_active':in_active
+    }
+    return render(request, 'cart/carts.html', context)
+
+
+def cart_detail(request, id):
+    cart = models.Cart.objects.get(id=id)
+    items = models.CartProduct.objects.filter(card=cart)
+    context = {
+        'cart':cart,
+        'items':items
+    }
+    return render(request, 'cart/cart_detail.html', context)
+
+
+def cart_detail_delete(request):
+    item_id = request.GET['items_id']
+    item = models.CartProduct.objects.get(id=item_id)
+    cart_id = item.card.id
+    item.delete()
+    return redirect('main:cart_detail', cart_id)

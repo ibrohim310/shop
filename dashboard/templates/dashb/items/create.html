@@ -23,59 +23,37 @@
                                     <div class="card-header">
                                         <h3 class="card-title">yangilik yaratish</h3>
                                     </div>
-                                    <form method='post' enctype="multipart/form-data"> 
-                                        {% csrf_token %} 
-                                    <div class="card-body pb-2">
-                                        <div class="row row-sm">
-                                            <div class="col-lg">
-                                                <label>Sarlavha</label>
-                                                <input class="form-control mb-4" placeholder="Nom kiriting" type="text" name='title'>
+
+                                        <form method='post' enctype="multipart/form-data"> 
+                                            {% csrf_token %} 
+                                        <div class="card-body pb-2">
+                                            <div class="row row-sm">
+                                                <div class="form-group">
+                                                    <label>Nom</label>
+                                                    <input class="form-control  mb-4" placeholder="Nom kiriting" required type="text" name="name">
+                                                    <label>Tana qisim</label>
+                                                    <textarea class="form-control mb-4 " placeholder="Textarea (success state)" required rows="3" style="height: 60px;" name="description"></textarea>
+                                                    <label>Miqdor</label>
+                                                    <input class="form-control  mb-4" placeholder="" required type="number" name="quantity">
+                                                    <label>Narx</label>
+                                                    <input class="form-control  mb-4" placeholder="" required type="number" name="price">
+                                                    <label>Pul birligi</label>
+                                                    <select class="form-control select2" name="currency">
+                                                        <option value="1">Dollar</option>
+                                                        <option value="2">So`m</option>
+                                                    </select>
+                                                    <label>Categoriyalar</label>
+                                                    <select class="form-control select2" name="category_id">
+                                                        {% for category in categorys %}
+                                                        <option value="{{category.id}}">{{category.name}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <label>Baner rasm yuklang</label>
+                                                    <input type="file" class="dropify" data-bs-height="180" name="baner_image">
+                                                    <label>Rasmlar yuklang</label>
+                                                    <input type="file" class="dropify" data-bs-height="180" name="images" multiple>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="row row-sm">
-                                            <div class="col-lg">
-                                                <label>Tana qism</label>
-                                                <textarea cols="30" rows="10" class="form-control mb-4" name="description"></textarea>
-                                                <div class="row row-sm">
-                                                    <div class="col-lg">
-                                                        <label>Quantity</label>
-                                                        <input class="form-control mb-4" placeholder="kiriting" type="text" name='quantity'>
-                                                    </div>
-                                                </div>
-                                                <div class="row row-sm">
-                                                    <div class="col-lg">
-                                                        <label>Narxi</label>
-                                                        <input class="form-control mb-4" placeholder="kiriting" type="text" name='price'>
-                                                    </div>
-                                                </div>
-                                                <div class="row row-sm">
-                                                    <div class="col-lg">
-                                                        <label>Narxi</label>
-                                                        <input class="form-control mb-4" placeholder="kiriting" type="text" name='price'>
-                                                    </div>
-                                                </div>
-                                                <div class="row row-sm">
-                                                    <div class="col-lg">
-                                                        <label>Chegirma narxi</label>
-                                                        <input class="form-control mb-4" placeholder="kiriting" type="text" name='discount_price'>
-                                                    </div>
-                                                </div>
-                                                <label>currency</label>
-                                                <select class="form-control select2" name="currency" >
-                                                    {%  for item in items %}
-                                                    <option value="">{{ item.currency}}</option>
-                                                    {% endfor %}
-                                                </select>
-                                                <label>Categoryilar</label>
-                                                <select class="form-control select2" name="category_id" >
-                                                    {%  for category in categorys %}
-                                                    <option value="{{category.id}}">{{ category.name}}</option>
-                                                    {% endfor %}
-                                                </select>
-                                                <label>Rasm yuklash</label>
-                                                <input type="file" class="dropify" data-bs-height="180" name="baner_image">
-                                            </div>
-                                        </div>
                                         
                                         <div class="row">
                                             <div class="col-9"></div>

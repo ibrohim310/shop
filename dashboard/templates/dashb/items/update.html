@@ -35,29 +35,30 @@
                                         <div class="row row-sm">
                                             <div class="col-lg">
                                                 <label>Sarlavha</label>
-                                                <input class="form-control mb-4" value="{{item.name}}" type="text" name='name'>
+                                                <input class="form-control mb-4" value="{{product.name}}" type="text" name='name'>
                                             </div>
                                         </div>
                                         <div class="row row-sm">
                                             <div class="col-lg">
                                                 <label>Tana qism</label>
-                                                <textarea cols="30" rows="10" class="form-control mb-4"  name="description">{{item.description}}</textarea>
-                                                    <label>Sarlavha</label>
-                                                    <input class="form-control mb-4" value="{{item.quantity}}" type="text" name='quantity'>
-                                                    <label>Sarlavha</label>
-                                                    <input class="form-control mb-4" value="{{item.price}}" type="text" name='price'>
-                                                    <label>Sarlavha</label>
-                                                    <input class="form-control mb-4" value="{{item.discount_price}}" type="text" name='discount_price'>
-                                                <label>currency</label>
-                                                <select class="form-control select2" name="currency" >
-                                                    {%  for item in items %}
-                                                        {% if item == item.currency %}
-                                                        <option value="" selected>{{ item.currency}}</option>
-                                                        {% else %}
-                                                        <option value="">{{ item.currency}}</option>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                </select>
+                                                <textarea cols="30" rows="10" class="form-control mb-4"  name="description">{{product.description}}</textarea>
+                                                    <label>maxsulot soni</label>
+                                                    <input class="form-control mb-4" value="{{product.quantity}}" type="number" name='quantity'>
+                                                    <label>narxi</label>
+                                                    <input class="form-control mb-4" value="{{product.price}}" type="number" name='price'>
+                                                    <label>chegirma narxi</label>
+                                                    <input class="form-control mb-4" value="{{product.discount_price}}" type="number" name='discount_price'>
+                                                    
+                                                <label>Pul birligi</label>
+                                                    <select class="form-control select2"  name="currency">
+                                                        {% for currency in currencys %}
+                                                            {% if currency == product.currency %}
+                                                            <option value="1">Dollar</option>
+                                                            {% else %}
+                                                            <option value="2">So`m</option>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </select>
                                                 <label>Categoryilar</label>
                                                 <select class="form-control select2" name="category_id" >
                                                     {%  for category in categorys %}
@@ -69,8 +70,11 @@
                                                     {% endfor %}
                                                 </select>
                                                 <label>Rasm yuklash</label>
-                                                <input type="file" class="dropify" data-bs-height="180" name="baner_image"> <br>
-                                                <img src="{{item.baner_image.url}}" alt="">
+                                                <input type="file" class="dropify" data-bs-height="180" name="baner_image">
+                                                <img src="{{product.baner_image.url}}" alt=""> <br>
+                                                <label>Rasm yuklash</label>
+                                                <input type="file" class="dropify" data-bs-height="180" name="images" multiple> 
+                                                <img src="{{product.image.url}}" alt=""> <br>
                                             </div>
                                         </div>
                                         
@@ -104,7 +108,7 @@
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <form action="{% url 'item_delete' item.id %}" method="get">
+                <form action="{% url 'product_delete' product.id %}" method="get">
                 <div class="modal-body">
                     <h6>Yangilikni ochirishga rozimisiz?</h6>
                     <!-- Select2 -->
@@ -114,7 +118,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn ripple btn-danger" type="submit">ochirish</button>
-                    <!-- <a href="{% url 'item_delete' item.id %}" class="btn ripple btn-success">ochirish</a> -->
+                    <!-- <a href="{% url 'product_delete' product.id %}" class="btn ripple btn-success">ochirish</a> -->
                     <button class="btn ripple btn-success">Qaytish</button>
                 </div>
                 </form>
