@@ -5,6 +5,9 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
+import datetime
+from openpyxl import Workbook
+from django.http import HttpResponse
 
 
 def dashboard(request):
@@ -200,6 +203,81 @@ def sign_out(request):
     logout(request)
     return redirect('index')
 
+
+
+
+def create_enter(request):
+    if request.method == 'POST':
+        product_id = request.POST['product_id']
+        quantity = int(request.POST['quantity'])
+        models.EnterProduct.objects.create(
+            product_id=product_id,
+            quantity=quantity
+        )
+        return redirect('dashb:create_enter')
+    return render(request, 'dashb/enter/create.html', {'products':models.Product.objects.all()})
+
+
+def update_enter(request, id):
+    if request.method == 'POST':
+        quantity = int(request.POST['quantity'])
+        enter = models.EnterProduct.objects.get(id=id)
+        enter.quantity = quantity
+        enter.save()
+    return redirect('dashb:list_enter')
+
+
+def delete_enter(request, id):
+    models.EnterProduct.objects.get(id=id).delete()
+    return redirect('dashb:list_enter')
+
+
+def list_enter(request):
+    enters = models.EnterProduct.objects.all()
+    context = {'enters':enters}
+    return render(request, 'dashb/enter/list.html', context)
+
+
+# views.py
+
+def kirim(request):
+    kirims = models.EnterProduct.objects.all()
+    products = models.Product.objects.all()
+    context = {'kirims':kirims,
+               'products':products}
+    return render(request, 'dashb/items/kirim.html', context)
+
+
+
+
+
+def generate_excel(request):
+    # Ma'lumotlarni olish
+    enters = models.EnterProduct.objects.all()
+
+    # Excel faylni yaratish
+    wb = Workbook()
+    ws = wb.active
+
+    # Ma'lumotlarni Excel fayliga yozish
+    ws.append(['№', 'Maxsulot nomi', 'Soni', 'Sana'])
+    for enter in enters:
+        row = [
+            enter.id,
+            enter.product.name if enter.product else enter.product_name,
+            enter.quantity,
+            enter.created_at.strftime('%Y-%m-%d %H:%M')
+        ]
+        ws.append(row)
+
+    # Response obyektini yaratish
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="malumotlar.xlsx"'
+
+    # Excel faylni HttpResponse ga yozish
+    wb.save(response)
+
+    return response
 
 
 

@@ -12,6 +12,9 @@ urlpatterns = [
     path('wish-list/create',views.create_wish_list, name='create_wish_list'),
     path('wish-list/list',views.list_wish_list, name='list_wish_list'),
     path('wish-list/delete',views.delete_wish_list, name='delete_wish_list'),
+    path('profile/edit.html',views.edit_profile, name='edit_profile'),
+    path('main:edit_profile',views.set_password, name='set_password'),
+
 
     
 ]

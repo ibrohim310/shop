@@ -17,5 +17,13 @@ urlpatterns = [
     path('auth/register', views.register_user, name='register_user'),
     path('auth/sign-in', views.sign_in, name='sign_in'),
     path('auth/sign-out', views.sign_out, name='sign_out'),
+    #enter
+    path('enter-list', views.list_enter, name='list_enter'),
+    path('enter-create', views.create_enter, name='create_enter'),
+    path('enter-update/<int:id>/', views.update_enter, name='update_enter'),
+    path('enter-delete/<int:id>/', views.delete_enter, name='delete_enter'),
+    #kirim
+    path('dashb/items/kirim', views.kirim, name='kirim'),
+    path('generate-excel/', views.generate_excel, name='generate_excel'),
 
 ]

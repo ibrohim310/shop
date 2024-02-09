@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from functools import reduce
+from django.db import models
 
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -19,7 +20,7 @@ class Product(models.Model):
             (1,'Dollar'), 
             (2, 'So`m')
             )
-    ) 
+    )
     discount_price = models.DecimalField(
         decimal_places=2, 
         max_digits=10, 
@@ -39,7 +40,7 @@ class Product(models.Model):
         except ZeroDivisionError:
             result = 0
         return result
-    
+
     @property 
     def is_discount(self):
         if self.discount_price is None:
@@ -99,3 +100,29 @@ class CartProduct(models.Model):
         else:
             result = self.product.price * self.quantity
         return result
+
+
+class EnterProduct(models.Model):
+    quantity = models.IntegerField()
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    product_name = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.quantity}"
+    
+    def save(self, *args, **kwargs):
+        self.product_name = self.product.name
+        if self.pk:
+            enter = EnterProduct.objects.get(pk=self.pk)
+            product = enter.product # None/Product
+            product.quantity -= enter.quantity
+            product.quantity += self.quantity
+            product.save()
+        else:
+            self.product.quantity += self.quantity
+            self.product.save()
+        super(EnterProduct, self).save(*args, **kwargs)
+
+# models.py
+

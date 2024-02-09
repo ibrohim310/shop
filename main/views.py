@@ -112,3 +112,29 @@ def list_wish_list(request):
 def delete_wish_list(request):
     models.WishList.objects.get(id=request.GET['id']).delete()
     return redirect('main:list_wish_list')
+
+
+
+def edit_profile(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        first_name = request.POST['first_name']
+        email = request.POST['email']
+        user = request.user
+        user.username = username
+        user.first_name = first_name
+        user.email = email
+        user.save()
+    return render(request, 'profile/edit.html')
+
+
+def set_password(request):
+
+    old = request.POST['old']
+    new = request.POST['new']
+    confirm = request.POST['confirm']
+    user = request.user
+    if user.check_password(old) and new == confirm:
+        user.set_password(new)
+        user.save()
+    return redirect('main:edit_profile')
