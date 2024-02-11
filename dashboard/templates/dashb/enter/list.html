@@ -7,12 +7,29 @@
             <!-- CONTAINER -->
             <div class="main-container container-fluid">
 
-                <!-- PAGE-HEADER -->
-                <div class="page-header">
-                    <h1 class="page-title">Kirimlar</h1>
-                    
-                    <a href="{% url 'generate_excel' %}"><button class="btn btn-danger">Excel generate</button></a>
+                    <div class="page-header">
+                        <form method="get" class="d-flex">
+                            <label for="name">Maxsulot nom</label>
+                            <input class="form-control" type="text" name="name" id="name" required>
+                            <label for="quantity">Miqdor</label>
+                            <input class="form-control" type="number" name="quantity" id="quantity" required>
+                            <label for="created_at">Sana</label>
+                            <input class="form-control" type="datetime-local" name="created_at" id="created_at" required>
+                            <button type="submit" class="btn btn-success w-50 ms-1" >Filter</button>
+                        </form>
+                        <a href="{% url 'generate_excel' %}"><button class="btn btn-danger">Excel generate</button></a>
+                        
                 </div>
+                
+                <form method="post" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            <input type="file" name="excel_file" accept=".xlsx, .xls">
+                                            <button type="submit" class="btn btn-light">Import Excel</button>
+                                        </form>
+                
+                
+                    
+                   
                 <!-- PAGE-HEADER END -->
                 
                 <!-- Row -->
@@ -73,7 +90,7 @@
                             <div class="modal-body">
                                 <form action="{% url 'update_enter' i.id %}" method="post">
                                     {% csrf_token %}
-                                    <input type="text" class="form-control" name="quantity" value="{{i.quantity}}">
+                                    <input type="number" class="form-control" name="quantity" value="{{i.quantity}}">
                                 
                             </div>
                             <div class="modal-footer">

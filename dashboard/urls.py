@@ -11,8 +11,10 @@ urlpatterns = [
     #item
     path('dashb/items/create', views.product_create, name='product_create'),
     path('dashb/items/list', views.products, name='products'),
+    path('dashb/items/lists', views.productss, name='product'),
     path('dashb/items/update/<int:id>/', views.product_update, name='product_update'),
     path('dashb/items/delete/<int:id>/', views.product_delete,name='product_delete'),
+    path('dashb/items/detail/int:id>/', views.product_detail,name='product_detail'),
     #authentication
     path('auth/register', views.register_user, name='register_user'),
     path('auth/sign-in', views.sign_in, name='sign_in'),
@@ -25,5 +27,6 @@ urlpatterns = [
     #kirim
     path('dashb/items/kirim', views.kirim, name='kirim'),
     path('generate-excel/', views.generate_excel, name='generate_excel'),
+    path('import-excel/', views.import_excel, name='import_excel'),
 
 ]

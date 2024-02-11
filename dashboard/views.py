@@ -8,7 +8,9 @@ from django.contrib.auth.decorators import login_required
 import datetime
 from openpyxl import Workbook
 from django.http import HttpResponse
-
+from itertools import chain
+from datetime import datetime, date
+import xlrd
 
 def dashboard(request):
     categorys = models.Category.objects.all()
@@ -102,6 +104,9 @@ def category_delete(request, id):
 
 #product
 
+def productss(request):
+    products = models.Product.objects.all()
+    return render(request, 'dashb/items/lists.html', {'products':products})
 
 
 def product_create(request):
@@ -137,7 +142,13 @@ def product_create(request):
 
 
 def products(request):
-    products = models.Product.objects.all()
+    name = request.GET.get('name')
+    if name:
+        products = models.EnterProduct.objects.filter(
+            product__name=name,
+        )
+    else:
+        products = models.Product.objects.all()
     context  = {
         'products':products,
 
@@ -204,7 +215,25 @@ def sign_out(request):
     return redirect('index')
 
 
+def product_detail(request, id):
+    product = models.Product.objects.get(id=id)
+    enters = models.EnterProduct.objects.filter(product=product)
+    outs = models.CartProduct.objects.filter(product=product, card__is_active=False)
+    query_set = sorted(
+        chain(
+            enters,
+            outs
+        ),
+        key = lambda x : x.created_at
+    )
+    # for i in query_set:
+    #     try:
+    #         i.card
+    #         print(f"chiqish {i}")
+    #     except:
+    #         print(f"kirish {i}")
 
+    return render(request, 'dashb/items/detail.html', {'query_set':query_set})
 
 def create_enter(request):
     if request.method == 'POST':
@@ -233,7 +262,18 @@ def delete_enter(request, id):
 
 
 def list_enter(request):
-    enters = models.EnterProduct.objects.all()
+    name = request.GET.get('name')
+    quantity = request.GET.get('quantity')
+    created_at = request.GET.get('created_at')
+    if name and quantity and created_at:
+        enters = models.EnterProduct.objects.filter(
+            product__name=name,
+            quantity=quantity,
+            created_at__gt = datetime.strptime(created_at, '%Y-%m-%dT%H:%M'),
+            created_at__lte = datetime.strptime(created_at, '%Y-%m-%dT%H:%M'),
+        )
+    else:
+        enters = models.EnterProduct.objects.all()
     context = {'enters':enters}
     return render(request, 'dashb/enter/list.html', context)
 
@@ -261,6 +301,7 @@ def generate_excel(request):
 
     # Ma'lumotlarni Excel fayliga yozish
     ws.append(['№', 'Maxsulot nomi', 'Soni', 'Sana'])
+    
     for enter in enters:
         row = [
             enter.id,
@@ -269,6 +310,7 @@ def generate_excel(request):
             enter.created_at.strftime('%Y-%m-%d %H:%M')
         ]
         ws.append(row)
+
 
     # Response obyektini yaratish
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -281,3 +323,36 @@ def generate_excel(request):
 
 
 
+
+
+
+
+from openpyxl import load_workbook
+
+def import_excel(request):
+    if request.method == 'POST' and request.FILES['excel_file']:
+        excel_file = request.FILES['excel_file']
+        
+        # Excel faylini yuklash
+        wb = load_workbook(excel_file)
+        ws = wb.active
+
+        # Ma'lumotlarni bazaga saqlash
+        for row in ws.iter_rows(min_row=2, values_only=True):  # 1-qator nomlari hisobga olinmaydi, shuning uchun 2-qatordan boshlaymiz
+            product_name = row[1]
+            quantity = row[2] or 0  # Agar quantity bo'sh bo'lsa, 0 deb qo'yamiz
+            created_at = row[3]
+
+            # Sana qiymati string ko'rinishida, uni datetime obyektiga aylantiramiz
+            created_at = datetime.strptime(created_at, '%Y-%m-%d %H:%M')
+
+            enter_product = models.EnterProduct.objects.create(
+                product_name=product_name,
+                quantity=quantity,
+                created_at=created_at
+            )
+
+        # Sahifani qayta yuklash uchun redirect qiling
+        return HttpResponse("Excel fayl muvaffaqiyatli saqlandi!")
+    else:
+        return render(request, 'your_template_name.html')

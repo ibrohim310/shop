@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from functools import reduce
-from django.db import models
+from datetime import datetime
 
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -71,6 +71,7 @@ class ProductReview(models.Model):
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
+    date = models.DateTimeField(blank=True, null=True)
 
     @property
     def quantity(self):
@@ -86,6 +87,11 @@ class Cart(models.Model):
         for i in CartProduct.objects.filter(card_id=self.id):
             result +=(i.product.price)*i.quantity
         return result
+    
+    def save(self, *args, **kwargs):
+        if not self.is_active and not self.date:
+            self.date = datetime.now()
+        super(Cart, self).save(*args, **kwargs)
 
 
 class CartProduct(models.Model):
@@ -123,6 +129,12 @@ class EnterProduct(models.Model):
             self.product.quantity += self.quantity
             self.product.save()
         super(EnterProduct, self).save(*args, **kwargs)
+    
+    def save(self, *args, **kwargs):
+        if not self.product:
+            self.product = Product.objects.create(name=self.product_name)
+        super().save(*args, **kwargs)
+
 
 # models.py
 
