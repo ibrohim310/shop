@@ -1,16 +1,16 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from main import models
-from django.shortcuts import render, redirect
-from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 import datetime
 from openpyxl import Workbook
 from django.http import HttpResponse
 from itertools import chain
-from datetime import datetime, date
-import xlrd
+from datetime import datetime
+from . funcs import search_with_fields, pagenator_page
+from django.core.exceptions import FieldError
+
 
 def dashboard(request):
     categorys = models.Category.objects.all()
@@ -104,9 +104,25 @@ def category_delete(request, id):
 
 #product
 
+#def productss(request):
+#    products = models.Product.objects.all()
+#    return render(request, 'dashb/items/lists.html', {'products':products})
 def productss(request):
-    products = models.Product.objects.all()
-    return render(request, 'dashb/items/lists.html', {'products':products})
+    try:
+        result = search_with_fields(request)
+        products = models.EnterProduct.objects.filter(**result)
+    except FieldError as err:
+        field_name = err.__doc__.split()[3][1:-1]
+        if field_name in result:
+            del result[field_name]
+            products = models.Product.objects.filter(**result)
+        else:
+            # Field is not found in result, handle this situation accordingly
+            # or raise an error if needed
+            products = models.Product.objects.none()
+
+    context = {'products': pagenator_page(products, 1, request)}
+    return render(request, 'dashb/items/lists.html', context)
 
 
 def product_create(request):
@@ -141,18 +157,36 @@ def product_create(request):
     return render(request, 'dashb/items/create.html', context)
 
 
-def products(request):
-    name = request.GET.get('name')
-    if name:
-        products = models.EnterProduct.objects.filter(
-            product__name=name,
-        )
-    else:
-        products = models.Product.objects.all()
-    context  = {
-        'products':products,
+#def products(request):
+#    name = request.GET.get('name')
+#    if name:
+#        products = models.EnterProduct.objects.filter(
+#            product__name=name,
+#        )
+#    else:
+#        products = models.Product.objects.all()
+#    context  = {
+#        'products':products,
+#
+#    }
+#    return render(request, 'dashb/items/list.html', context)
 
-    }
+
+def products(request):
+    try:
+        result = search_with_fields(request)
+        products = models.EnterProduct.objects.filter(**result)
+    except FieldError as err:
+        field_name = err.__doc__.split()[3][1:-1]
+        if field_name in result:
+            del result[field_name]
+            products = models.Product.objects.filter(**result)
+        else:
+            # Field is not found in result, handle this situation accordingly
+            # or raise an error if needed
+            products = models.Product.objects.none()
+
+    context = {'products': pagenator_page(products, 1, request)}
     return render(request, 'dashb/items/list.html', context)
 
 
@@ -243,7 +277,7 @@ def create_enter(request):
             product_id=product_id,
             quantity=quantity
         )
-        return redirect('dashb:create_enter')
+        return redirect('list_enter')
     return render(request, 'dashb/enter/create.html', {'products':models.Product.objects.all()})
 
 
@@ -260,23 +294,69 @@ def delete_enter(request, id):
     models.EnterProduct.objects.get(id=id).delete()
     return redirect('dashb:list_enter')
 
+#def list_enter(request):
+#    result = search_with_fields(request)
+#    try: 
+#        enters = models.EnterProduct.objects.filter(**result)
+#    except FieldError as err:
+#        del result[err.__doc__.split()[3][1:-1]]
+#        enters = models.EnterProduct.objects.filter(**result)
+#
+#    context = {'enters': pagenator_page(enters, 1, request)}
+#    return render(request, 'dashb/enter/list.html', context)
+
+
 
 def list_enter(request):
-    name = request.GET.get('name')
-    quantity = request.GET.get('quantity')
-    created_at = request.GET.get('created_at')
-    if name and quantity and created_at:
-        enters = models.EnterProduct.objects.filter(
-            product__name=name,
-            quantity=quantity,
-            created_at__gt = datetime.strptime(created_at, '%Y-%m-%dT%H:%M'),
-            created_at__lte = datetime.strptime(created_at, '%Y-%m-%dT%H:%M'),
-        )
-    else:
-        enters = models.EnterProduct.objects.all()
-    context = {'enters':enters}
+    result = search_with_fields(request)
+    try: 
+        enters = models.EnterProduct.objects.filter(**result)
+    except FieldError as err:
+        field_name = err.__doc__.split()[3][1:-1]
+        if field_name in result:
+            del result[field_name]
+            enters = models.EnterProduct.objects.filter(**result)
+        else:
+            # Field is not found in result, handle this situation accordingly
+            # or raise an error if needed
+            enters = models.EnterProduct.objects.none()
+
+    context = {'enters': pagenator_page(enters, 1, request)}
     return render(request, 'dashb/enter/list.html', context)
 
+
+
+#def list_enter(request):
+#    result = search_with_fields(request)
+#    try: 
+#        enters = models.EnterProduct.objects.filter(**result)
+#
+#    except FieldError as err:
+#        del result[err.__doc__.split()[3][1:-1]]
+#        enters = models.EnterProduct.objects.filter(**result)
+#
+#    context = {'enters': pagenator_page(enters, 1, request)}
+#    return render(request, 'dashb/enter/list.html', context)
+
+
+
+
+#def list_enter(request):
+#    name = request.GET.get('name')
+#    quantity = request.GET.get('quantity')
+#    created_at = request.GET.get('created_at')
+#    if name and quantity and created_at:
+#        enters = models.EnterProduct.objects.filter(
+#            product__name=name,
+#            quantity=quantity,
+#            created_at__gt = datetime.strptime(created_at, '%Y-%m-%dT%H:%M'),
+#            created_at__lte = datetime.strptime(created_at, '%Y-%m-%dT%H:%M'),
+#        )
+#    else:
+#        enters = models.EnterProduct.objects.all()
+#    context = {'enters':enters}
+#    return render(request, 'dashb/enter/list.html', context)
+#
 
 # views.py
 
