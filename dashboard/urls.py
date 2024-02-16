@@ -11,7 +11,6 @@ urlpatterns = [
     #item
     path('dashb/items/create', views.product_create, name='product_create'),
     path('dashb/items/list', views.products, name='products'),
-    path('dashb/items/lists', views.productss, name='product'),
     path('dashb/items/update/<int:id>/', views.product_update, name='product_update'),
     path('dashb/items/delete/<int:id>/', views.product_delete,name='product_delete'),
     path('dashb/items/detail/int:id>/', views.product_detail,name='product_detail'),

@@ -8,31 +8,18 @@
             <div class="main-container container-fluid">
 
                 <!-- PAGE-HEADER -->
-                <!-- <div class="page-header">
-                        <form method="get" class="d-flex">
-                            <label for="name">Maxsulot nom</label>
-                            <input class="form-control" type="text" name="name" id="name" required>
-                            <label for="quantity">Miqdor</label>
-                            <input class="form-control" type="number" name="quantity" id="quantity" required>
-                            <label for="created_at">Sana</label>
-                            <input class="form-control" type="datetime-local" name="created_at" id="created_at" required>
-                            <button type="submit" class="btn btn-success w-50 ms-1" >Filter</button>
-                        </form>
-                    <button class="btn btn-primary">Excel generate</button>
-                </div> -->
                 <div class="page-header">
-                        <form method="get" class="d-flex">
-                            <label for="name">Maxsulot nom</label>
-                            <input class="form-control" type="text" name="name" id="name">
-                            <label for="quantity">Miqdor</label>
-                            <input class="form-control" type="number" name="quantity" id="quantity">
-                            <label for="created_at_start">Sana Boshlanish</label>
-                            <input class="form-control" type="datetime-local" name="created_at_start" id="created_at_start">
-                            <label for="created_at_end">Sana Tugash</label>
-                            <input class="form-control" type="datetime-local" name="created_at_end" id="created_at_end">
-                            <button type="submit" class="btn btn-success w-50 ms-1" >Filter</button>
-                        </form>
-                    <!-- <button class="btn btn-primary">Excel generate</button> -->
+                    <form method="get" class="d-flex">
+                        <label for="name">Maxsulot nom</label>
+                        <input class="form-control" type="text" name="name" id="name">
+                        <label for="quantity">Miqdor</label>
+                        <input class="form-control" type="number" name="quantity" id="quantity">
+                        <label for="created_at_start">Sana Boshlanish</label>
+                        <input class="form-control" type="datetime-local" name="created_at_start" id="created_at_start">
+                        <label for="created_at_end">Sana Tugash</label>
+                        <input class="form-control" type="datetime-local" name="created_at_end" id="created_at_end">
+                        <button type="submit" class="btn btn-success w-50 ms-1" >Filter</button>
+                    </form>
                 </div>
                 <!-- PAGE-HEADER END -->
                 
@@ -81,19 +68,6 @@
                                 </div>
                                 <br>
                                 <div class="d-flex justify-content-end" >
-                                    
-                                    <!-- <ul class="pagination">
-                                        <li class="page-item page-prev">
-                                            <a class="page-link" href="javascript:void(0)" tabindex="-1">Prev</a>
-                                        </li>
-                                        <li class="page-item active"><a class="page-link" href="javascript:void(0)">1</a></li>
-                                        <li class="page-item"><a class="page-link" href="javascript:void(0)">2</a></li>
-                                        <li class="page-item"><a class="page-link" href="javascript:void(0)">3</a></li>
-                                        <li class="page-item"><a class="page-link" href="javascript:void(0)">4</a></li>
-                                        <li class="page-item page-next">
-                                            <a class="page-link" href="javascript:void(0)">Next</a>
-                                        </li>
-                                    </ul> -->
                                     <div class="col-12 text-right">
                                         {% if enters.paginator.num_pages > 1 %}
                                             <nav aria-label="Page navigation example" class="text-end">
@@ -103,7 +77,7 @@
                                                     {% endif %}
                                                     {% for num in enters.paginator.page_range %}
                                                     {% if num == enters.number %}
-                                                    <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                                                    <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
                                                     {% elif num > enters.number|add:'-3' and num < enters.number|add:'3' %}
                                                     <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
                                                     {% endif %}
@@ -121,41 +95,41 @@
                     </div>
                 </div>
                 <!-- End Row -->
-                {% for i in enters %}
-                <div class="modal fade" id="modalupdate{{i.id}}">
+                {% for enter in enters %}
+                <div class="modal fade" id="modalupdate{{enter.id}}">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content modal-content-demo">
                             <div class="modal-header">
                                 <h6 class="modal-title">Kirimni o`zgartirish</h6><button aria-label="Close" class="btn-close" data-bs-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                             </div>
                             <div class="modal-body">
-                                <form action="{% url 'update_enter' i.id %}" method="post">
+                                <form action="{% url 'update_enter' enter.id %}" method="post">
                                     {% csrf_token %}
-                                    <input type="text" class="form-control" name="quantity" value="{{i.quantity}}">
-                                
-                            </div>
-                            <div class="modal-footer">
-                                <button class="btn btn-primary" type="submit">Saqlash</button> 
-                                <button class="btn btn-light" data-bs-dismiss="modal">Qaytish</button>
-                            </form>    
+                                    <input type="text" class="form-control" name="quantity" value="{{enter.quantity}}">
+                                    <div class="modal-footer">
+                                        <button class="btn btn-primary" type="submit">Saqlash</button> 
+                                        <button class="btn btn-light" data-bs-dismiss="modal">Qaytish</button>
+                                    </div>
+                                </form>    
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal fade" id="modaldelete{{i.id}}">
+                <div class="modal fade" id="modaldelete{{enter.id}}">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content modal-content-demo">
                             <div class="modal-header">
                                 <h6 class="modal-title">Maxsulotni o`chriish</h6><button aria-label="Close" class="btn-close" data-bs-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                             </div>
                             <div class="modal-body">
-                                <form action="{% url 'delete_enter' i.id %}" method="get">
+                                <form action="{% url 'delete_enter' enter.id %}" method="post">
+                                    {% csrf_token %}
                                     <label for="my_chkb">O`chirmoqchimisiz? </label>
                                     <input type="checkbox" required id="my_chkb">
-                                </div>
-                                <div class="modal-footer">
-                                    <button class="btn btn-primary" type="submit">O`chrish</button> 
-                                    <button class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-primary" type="submit">O`chrish</button> 
+                                        <button class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -168,4 +142,4 @@
         </div>
     </div>
     <!--app-content close-->
-    {% endblock %}
+{% endblock %}

@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect
 from . import models
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+
 
 def index(request):
     q = request.GET.get('q')
@@ -21,13 +24,13 @@ def index(request):
 
 
 
-def product_detail(request, id):
-    product = models.Product.objects.get(id=id)
-    categorys = models.Category.objects.all()
-    recomendation = models.Product.objects.filter(
-        category_id=product.category.id).exclude(id=product.id)[:3]
-    images = models.ProductImage.objects.filter(product_id=product.id)
-    is_saved = None
+#def product_detail(request, id):
+#    product = models.Product.objects.get(id=id)
+#    categorys = models.Category.objects.all()
+#    recomendation = models.Product.objects.filter(
+#        category_id=product.category.id).exclude(id=product.id)[:3]
+#    images = models.ProductImage.objects.filter(product_id=product.id)
+#    is_saved = None
 
     #way1
     #try:
@@ -37,40 +40,75 @@ def product_detail(request, id):
     #    is_saved=False
 
     #way2
-    objects = models.WishList.objects.filter(user=request.user, product=product)
-    if objects:
-        is_saved=objects.first().id
-    else:
-        is_saved=False
+#    objects = models.WishList.objects.filter(user=request.user, product=product)
+#    if objects:
+#        is_saved=objects.first().id
+#    else:
+#        is_saved=False
 
 #    _,b = models.WishList.objects.get_or_create(user=request.user, product=product)
 #    a,b = models.WishList.objects.get_or_create(user=request.user, product=product)
 #    print(a)
 #    print(b)
 
+#    context = {
+#        'product':product,
+#        'categorys':categorys,
+#        'recomendation':recomendation,
+#        'images':images,
+#        'range':range(product.review),
+#        'range_passiv':range(5-product.review),
+#        'is_saved':is_saved
+#    }
+#    return render(request, 'product/detail.html', context)
+
+
+def product_detail(request, id):
+    product = models.Product.objects.get(id=id)
+    categorys = models.Category.objects.all()
+    recomendation = models.Product.objects.filter(
+        category_id=product.category.id).exclude(id=product.id)[:3]
+    images = models.ProductImage.objects.filter(product_id=product.id)
+    is_saved = None
+
+    if request.user.is_authenticated:
+        objects = models.WishList.objects.filter(user=request.user, product=product)
+        if objects:
+            is_saved=objects.first().id
+        else:
+            is_saved=False
+    else:
+        is_saved = False  # Avvalki yoki anonim foydalanuvchilar uchun
+
     context = {
-        'product':product,
-        'categorys':categorys,
-        'recomendation':recomendation,
-        'images':images,
-        'range':range(product.review),
-        'range_passiv':range(5-product.review),
-        'is_saved':is_saved
+        'product': product,
+        'categorys': categorys,
+        'recomendation': recomendation,
+        'images': images,
+        'range': range(product.review),
+        'range_passiv': range(5-product.review),
+        'is_saved': is_saved
     }
+    
     return render(request, 'product/detail.html', context)
 
 
 
 
 def carts(request):
-    active = models.Cart.objects.filter(is_active=True, user=request.user)
-    in_active = models.Cart.objects.filter(is_active=False, user=request.user)
-    context = {
-        'active':active,
-        'in_active':in_active
-    }
-    return render(request, 'cart/carts.html', context)
+    if request.user.is_authenticated:
+        active = models.Cart.objects.filter(is_active=True, user=request.user)
+        in_active = models.Cart.objects.filter(is_active=False, user=request.user)
+    else:
+        active = None
+        in_active = None
 
+    context = {
+        'active': active,
+        'in_active': in_active
+    }
+
+    return render(request, 'cart/carts.html', context)
 
 def cart_detail(request, id):
     cart = models.Cart.objects.get(id=id)
@@ -90,23 +128,34 @@ def cart_detail_delete(request):
     return redirect('main:cart_detail', cart_id)
 
 
+#def create_wish_list(request):
+#    #user = request.user
+#    #product = models.Product.objects.get(id=request.POSt['product_id'])
+#    #models.WishList.objects.create(
+#    #    user=user,
+#    #    product=product
+#    #)
+#    models.WishList.objects.create(
+#        user=request.user,
+#        product_id=request.GET['product_id']
+#    )
+#    return redirect('main:create_wish_list')
+
+
+@login_required
 def create_wish_list(request):
-    #user = request.user
-    #product = models.Product.objects.get(id=request.POSt['product_id'])
-    #models.WishList.objects.create(
-    #    user=user,
-    #    product=product
-    #)
-    models.WishList.objects.create(
-        user=request.user,
-        product_id=request.GET['product_id']
-    )
-    return redirect('main:create_wish_list')
+    product_id = request.GET.get('product_id')
+    product = get_object_or_404(models.Product, id=product_id)
+    models.WishList.objects.create(user=request.user, product_id=product_id)
+    return redirect('main:create_wish_list', id=product_id)
 
 
+
+@login_required
 def list_wish_list(request):
     objects = models.WishList.objects.filter(user=request.user)
-    return render(request, 'wish/list.html', {'objects':objects})
+    return render(request, 'wish/list.html', {'objects': objects})
+
 
 
 def delete_wish_list(request):

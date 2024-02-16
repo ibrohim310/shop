@@ -1,3 +1,330 @@
+#from django.shortcuts import render, redirect
+#from django.contrib.auth.models import User
+#from main import models
+#from django.contrib.auth import login, authenticate, logout
+#from django.contrib.auth.decorators import login_required
+#from openpyxl import Workbook
+#from django.http import HttpResponse
+#from itertools import chain
+#from datetime import datetime as dt
+#from .funcs import search_with_fields  # funksiyalarni import qilish
+#from django.core.exceptions import FieldError
+#from django.urls import reverse
+#
+## Dashboard
+#@login_required(login_url='sign_in')
+#def dashboard(request):
+#    users_count = User.objects.filter(is_staff=False).count()
+#    products_count = models.Product.objects.count()
+#    category_count = models.Category.objects.count()
+#
+#    context = {
+#        'users_count': users_count,
+#        'products_count': products_count,
+#        'category_count': category_count
+#    }
+#    return render(request, 'dashb/index.html', context)
+#
+#
+## Category CRUD
+#def create_category(request):
+#    if request.method == 'POST':
+#        models.Category.objects.create(name=request.POST['name'])
+#        return redirect('categorys')
+#    return render(request, 'dashb/category/create.html')
+#
+#
+#def categorys(request):
+#    categorys = models.Category.objects.all()
+#    return render(request, 'dashb/category/list.html', {'categorys': categorys})
+#
+#
+#def category_update(request, id):
+#    category = models.Category.objects.get(id=id)
+#    if request.method == 'POST':
+#        category.name = request.POST['name']
+#        category.save()
+#    return render(request, 'dashb/category/update.html', {'category': category})
+#
+#
+#def category_delete(request, id):
+#    category = models.Category.objects.get(id=id)
+#    category.delete()
+#    return redirect('category_list')
+#
+#
+## Product CRUD
+#def products(request):
+#    try:
+#        result = search_with_fields(request)
+#        products = models.EnterProduct.objects.filter(**result)
+#    except FieldError as err:
+#        field_name = err.args[0].split("'")[1]
+#        if field_name in result:
+#            del result[field_name]
+#            products = models.EnterProduct.objects.filter(**result)
+#        else:
+#            products = models.EnterProduct.objects.none()
+#
+#    context = {'products':(products, 1, request)}
+#    return render(request, 'dashb/items/list.html', context)
+#
+#
+#def product_create(request):
+#    categorys = models.Category.objects.all()
+#    context = {'categorys': categorys}
+#
+#    if request.method == "POST":
+#        name = request.POST.get('name')
+#        description = request.POST.get('description')
+#        quantity = request.POST.get('quantity')
+#        price = request.POST.get('price')
+#        currency = request.POST.get('currency')
+#        category_id = request.POST.get('category_id')
+#        baner_image = request.FILES.get('baner_image')
+#        images = request.FILES.getlist('images')
+#
+#        product = models.Product.objects.create(
+#            name=name,
+#            description=description,
+#            quantity=quantity,
+#            price=price,
+#            currency=currency,
+#            category_id=category_id,
+#            baner_image=baner_image
+#        )
+#
+#        for image in images:
+#            models.ProductImage.objects.create(
+#                image=image,
+#                product=product
+#            )
+#
+#        return redirect('product_detail', id=product.id)
+#
+#    return render(request, 'dashb/items/create.html', context)
+#
+#
+#
+#def product_update(request, id):
+#    product = models.Product.objects.get(id=id)
+#    if request.method == 'POST':
+#        # Ma'lumotlarni olamiz va tekshiramiz
+#        # ...
+#
+#        # Ma'lumotlarni saqlash
+#        product.save()
+#
+#    context = {
+#        'product': product,
+#        'categorys': models.Category.objects.all(),
+#    }
+#
+#    return render(request, 'dashb/items/update.html', context)
+#
+#
+#def product_delete(request, id):
+#    models.Product.objects.get(id=id).delete()
+#    return redirect('items')
+#
+#
+## Authentication
+#def register_user(request):
+#    if request.method == 'POST':
+#        User.objects.create_user(
+#            username=request.POST['username'],
+#            password=request.POST['password']
+#        )
+#    return render(request, 'dashb/auth/register.html')
+#
+#
+#def sign_in(request):
+#    if request.method == 'POST':
+#        username = request.POST['username']
+#        password = request.POST['password']
+#        user = authenticate(username=username, password=password)
+#        if user:
+#            login(request, user)
+#            return redirect('dashb')
+#    return render(request, 'dashb/auth/login.html')
+#
+#
+#def sign_out(request):
+#    logout(request)
+#    return redirect('index')
+#
+#
+## Product detail
+#def product_detail(request, id):
+#    product = models.Product.objects.get(id=id)
+#    enters = models.EnterProduct.objects.filter(product=product)
+#    outs = models.CartProduct.objects.filter(product=product, card__is_active=False)
+#    query_set = sorted(
+#        chain(
+#            enters,
+#            outs
+#        ),
+#        key=lambda x: x.created_at
+#    )
+#    return render(request, 'dashb/items/detail.html', {'query_set': query_set})
+#
+#
+## EnterProduct CRUD
+#def create_enter(request):
+#    if request.method == 'POST':
+#        product_id = request.POST['product_id']
+#        quantity = int(request.POST['quantity'])
+#        models.EnterProduct.objects.create(
+#            product_id=product_id,
+#            quantity=quantity
+#        )
+#        return redirect('list_enter')
+#    return render(request, 'dashb/enter/create.html', {'products': models.Product.objects.all()})
+#
+#
+#def update_enter(request, id):
+#    if request.method == 'POST':
+#        quantity = int(request.POST['quantity'])
+#        enter = models.EnterProduct.objects.get(id=id)
+#        enter.quantity = quantity
+#        enter.save()
+#    return redirect('dashb:list_enter')
+#
+#
+#def delete_enter(request, id):
+#    models.EnterProduct.objects.get(id=id).delete()
+#    return redirect('dashb:list_enter')
+#
+#
+#def list_enter(request):
+#    result = search_with_fields(request)
+#    try:
+#        enters = models.EnterProduct.objects.filter(**result)
+#    except FieldError as err:
+#        del result[err.args[0].split("'")[1]]
+#        enters = models.EnterProduct.objects.filter(**result)
+#
+#    enters = [
+#        models.EnterProduct.objects.filter(
+#            created_at__year=dt.now().year,
+#            created_at__month=i,
+#        ).count()
+#        for i in range(1, 13)
+#    ]
+#
+#    context = {
+#        'enters':(enters, 1, request),
+#        'data1': enters,
+#    }
+#    return render(request, 'dashb/enter/list.html', context)
+#
+#
+## Other views
+#def kirim(request):
+#    kirims = models.EnterProduct.objects.all()
+#    products = models.Product.objects.all()
+#    context = {'kirims': kirims, 'products': products}
+#    return render(request, 'dashb/items/kirim.html', context)
+#
+#
+#def generate_excel(request):
+#    # Ma'lumotlarni olish
+#    enters = models.EnterProduct.objects.all()
+#
+#    # Excel faylni yaratish
+#    wb = Workbook()
+#    ws = wb.active
+#
+#    # Ma'lumotlarni Excel fayliga yozish
+#    ws.append(['№', 'Maxsulot nomi', 'Soni', 'Sana'])
+#
+#    for enter in enters:
+#        row = [
+#            enter.id,
+#            enter.product.name if enter.product else enter.product_name,
+#            enter.quantity,
+#            enter.created_at.strftime('%Y-%m-%d %H:%M')
+#        ]
+#        ws.append(row)
+#
+#    # Response obyektini yaratish
+#    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+#    response['Content-Disposition'] = 'attachment; filename="malumotlar.xlsx"'
+#
+#    # Excel faylni HttpResponse ga yozish
+#    wb.save(response)
+#
+#    return response
+#
+#
+#from openpyxl import load_workbook
+#
+#def import_excel(request):
+#    if request.method == 'POST' and request.FILES['excel_file']:
+#        excel_file = request.FILES['excel_file']
+#
+#        # Excel faylini yuklash
+#        wb = load_workbook(excel_file)
+#        ws = wb.active
+#
+#        # Ma'lumotlarni bazaga saqlash
+#        for row in ws.iter_rows(min_row=2, values_only=True):
+#            product_name = row[1]
+#            quantity = row[2] or 0
+#            created_at = row[3]
+#            created_at = dt.strptime(created_at, '%Y-%m-%d %H:%M')
+#
+#            enter_product = models.EnterProduct.objects.create(
+#                product_name=product_name,
+#                quantity=quantity,
+#                created_at=created_at
+#            )
+#
+#        # Sahifani qayta yuklash uchun redirect qiling
+#        return HttpResponse("Excel fayl muvaffaqiyatli saqlandi!")
+#    else:
+#        return render(request, 'your_template_name.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from main import models
@@ -10,7 +337,7 @@ from itertools import chain
 from datetime import datetime
 from . funcs import search_with_fields, pagenator_page
 from django.core.exceptions import FieldError
-
+from django.urls import reverse
 
 def dashboard(request):
     categorys = models.Category.objects.all()
@@ -49,7 +376,7 @@ def category_update(request, id):
 def category_delete(request, id):
     category = models.Category.objects.get(id=id)
     category.delete()
-    return redirect('category_list')
+    return redirect('dashb:category_list')
 
 
 
@@ -98,8 +425,9 @@ def category_update(request, id):
 
 
 def category_delete(request, id):
-    models.Category.objects.get(id=id).delete()
-    return redirect('category')
+    category = models.Category.objects.get(id=id)
+    category.delete()
+    return redirect('category_list')
 
 
 #product
@@ -307,37 +635,47 @@ def delete_enter(request, id):
 
 
 
-def list_enter(request):
-    result = search_with_fields(request)
-    try: 
-        enters = models.EnterProduct.objects.filter(**result)
-    except FieldError as err:
-        field_name = err.__doc__.split()[3][1:-1]
-        if field_name in result:
-            del result[field_name]
-            enters = models.EnterProduct.objects.filter(**result)
-        else:
-            # Field is not found in result, handle this situation accordingly
-            # or raise an error if needed
-            enters = models.EnterProduct.objects.none()
-
-    context = {'enters': pagenator_page(enters, 1, request)}
-    return render(request, 'dashb/enter/list.html', context)
-
-
-
 #def list_enter(request):
 #    result = search_with_fields(request)
 #    try: 
 #        enters = models.EnterProduct.objects.filter(**result)
-#
 #    except FieldError as err:
-#        del result[err.__doc__.split()[3][1:-1]]
-#        enters = models.EnterProduct.objects.filter(**result)
+#        field_name = err.__doc__.split()[3][1:-1]
+#        if field_name in result:
+#            del result[field_name]
+#            enters = models.EnterProduct.objects.filter(**result)
+#        else:
+#            # Field is not found in result, handle this situation accordingly
+#            # or raise an error if needed
+#            enters = models.EnterProduct.objects.none()
 #
 #    context = {'enters': pagenator_page(enters, 1, request)}
 #    return render(request, 'dashb/enter/list.html', context)
 
+
+
+def list_enter(request):
+    result = search_with_fields(request)
+    try: 
+        enters = models.EnterProduct.objects.filter(**result)
+
+    except FieldError as err:
+        del result[err.__doc__.split()[3][1:-1]]
+        enters = models.EnterProduct.objects.filter(**result)
+
+    enters = [
+        models.EnterProduct.objects.filter(
+            created_at__year=datetime.now().year,
+            created_at__month=i, 
+            ).count()
+        for i in range(1,13)
+    ]
+
+    context = {
+        'enters': pagenator_page(enters, 1, request),
+        'data1':enters,
+        }
+    return render(request, 'dashb/enter/list.html', context)
 
 
 

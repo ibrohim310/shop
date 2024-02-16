@@ -6,39 +6,41 @@
 	<div class="ckeckout">
 		<div class="container">
 			<div class="ckeckout-top">
-			<div class="cart-items">
-			 <h3>Kirim</h3>
-			<div class="in-check" >
-				<ul class="unit">
-					<li><span>maxsulot soni</span></li>
-					<li><span>Maxsulotlar nomi</span></li>		
-					<div class="clearfix"></div>
-				</ul>
-                {% for kirim in kirims %}
-				<ul class="cart-header">
-						<li><span class="name">{{kirim.quantity}}</span></li>
-						<li><span class="cost">{{kirim.name}}</span></li>
-					<div class="clearfix"> </div>
-				</ul> <br>
-                {% endfor %}
-			</div>
-			 <h3>chiqim</h3>
-			<div class="in-check" >
-				<ul class="unit">
-					<li><span>maxsulot soni</span></li>
-					<li><span>Maxsulotlar nomi</span></li>		
-					<div class="clearfix"></div>
-				</ul>
-                {% for kirim in kirims %}
-				<ul class="cart-header">
-						<li><span class="name">{{kirim.quantity}}</span></li>
-						<li><span class="cost">{{kirim.products.name}}</span></li>
-					<div class="clearfix"> </div>
-				</ul> <br>
-                {% endfor %}
-			</div>
+				<div class="cart-items">
+					<h3>Kirim</h3>
+					<div class="in-check">
+						<ul class="unit">
+							<li><span>Maxsulot soni</span></li>
+							<li><span>Maxsulotlar nomi</span></li>		
+							<div class="clearfix"></div>
+						</ul>
+						{% for kirim in kirims %}
+						<ul class="cart-header">
+							<li><span class="name">{{ kirim.quantity }}</span></li>
+							<li><span class="cost">{{ kirim.product.name }}</span></li>
+							<div class="clearfix"></div>
+						</ul> <br>
+						{% endfor %}
+					</div>
+				</div>
+				<div class="cart-items">
+					<h3>Chiqim</h3>
+					<div class="in-check">
+						<ul class="unit">
+							<li><span>Maxsulot soni</span></li>
+							<li><span>Maxsulotlar nomi</span></li>		
+							<div class="clearfix"></div>
+						</ul>
+						{% for chiqim in chiqims %}
+						<ul class="cart-header">
+							<li><span class="name">{{ chiqim.quantity }}</span></li>
+							<li><span class="cost">{{ chiqim.product.name }}</span></li>
+							<div class="clearfix"></div>
+						</ul> <br>
+						{% endfor %}
+					</div>
+				</div>
 			</div>  
-		 </div>
 		</div>
 	</div>
 	<!--end-ckeckout-->

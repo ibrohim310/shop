@@ -41,8 +41,10 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'dashboard.apps.DashboardConfig',
     'account.apps.AccountConfig',
-
-    'import_export'
+    'api.apps.ApiConfig',
+    
+    'import_export',
+    'rest_framework',
 
 ]
 
