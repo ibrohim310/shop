@@ -2,13 +2,24 @@ from django.db import models
 from django.contrib.auth.models import User
 from functools import reduce
 from datetime import datetime
+import slug
+from unidecode import unidecode
+from .funcs import code_generator
+
+from django.db import models
 
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(blank=True)
+    code_generation = models.CharField(max_length=255, unique=True, blank=True)
 
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        self.slug=slug.slug(unidecode(self.name, 'UTF-8'))
+        self.code_generation = code_generator()
+        super(Category, self).save(*args, **kwargs)
 
 class Product(models.Model):
     name = models.CharField(max_length=255)
@@ -29,6 +40,7 @@ class Product(models.Model):
         )
     baner_image = models.ImageField(upload_to='baner/')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    slug = models.SlugField(blank = True)
 
 
     @property
@@ -50,28 +62,50 @@ class Product(models.Model):
     @property 
     def is_active(self):
         return self.quantity > 0
+    
+
+    def save(self, *args, **kwargs):
+        self.slug=slug.slug(unidecode(self.name, 'UTF-8'))
+        super(Product, self).save(*args, **kwargs)
 
 
 class ProductImage(models.Model):
     image = models.ImageField(upload_to='products/')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    slug = models.SlugField(blank = True)
+
+
+    def save(self, *args, **kwargs):
+        self.slug=slug.slug(unidecode(self.name, 'UTF-8'))
+        super(ProductImage, self).save(*args, **kwargs)
 
 
 class WishList(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    slug = models.SlugField(blank = True)
+
+    def save(self, *args, **kwargs):
+        self.slug=slug.slug(unidecode(self.name, 'UTF-8'))
+        super(WishList, self).save(*args, **kwargs)
 
 
 class ProductReview(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     mark = models.SmallIntegerField()
+    slug = models.SlugField(blank = True)
+
+    def save(self, *args, **kwargs):
+        self.slug=slug.slug(unidecode(self.name, 'UTF-8'))
+        super(ProductReview, self).save(*args, **kwargs)
 
 
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
     date = models.DateTimeField(blank=True, null=True)
+    slug = models.SlugField(blank = True)
 
     @property
     def quantity(self):
@@ -94,10 +128,16 @@ class Cart(models.Model):
         super(Cart, self).save(*args, **kwargs)
 
 
+    def save(self, *args, **kwargs):
+        self.slug=slug.slug(unidecode(self.name, 'UTF-8'))
+        super(Cart, self).save(*args, **kwargs)
+
+
 class CartProduct(models.Model):
     card = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
+    slug = models.SlugField(blank = True)
     
     @property
     def total_price(self):
@@ -106,6 +146,11 @@ class CartProduct(models.Model):
         else:
             result = self.product.price * self.quantity
         return result
+    
+
+    def save(self, *args, **kwargs):
+        self.slug=slug.slug(unidecode(self.name, 'UTF-8'))
+        super(CartProduct, self).save(*args, **kwargs)
 
 
 class EnterProduct(models.Model):
@@ -113,6 +158,7 @@ class EnterProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     product_name = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    slug = models.SlugField(blank = True)
 
     def __str__(self):
         return f"{self.quantity}"
@@ -134,6 +180,10 @@ class EnterProduct(models.Model):
         if not self.product:
             self.product = Product.objects.create(name=self.product_name)
         super().save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        self.slug=slug.slug(unidecode(self.name, 'UTF-8'))
+        super(EnterProduct, self).save(*args, **kwargs)
 
 
 # models.py

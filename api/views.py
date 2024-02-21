@@ -1,11 +1,15 @@
 from . import serializers
 from main import models
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework import authentication
 from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User
+from . import custom_permissions
 
 
 #product
@@ -18,10 +22,11 @@ def list_products(request):
 
 
 @api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
+@authentication_classes([authentication.TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def product_detail(request, id):
-    product = models.Product.objects.get(id=id)
+def product_detail(request, slug):
+    user = request.user
+    product = models.Product.objects.get(slug=slug)
     image = models.ProductImage.objects.filter(product=product)
     serializer = serializers.DetailProductSerializer(product,image)
     return Response(serializer.data)
@@ -35,8 +40,8 @@ def category_list(request):
 
 
 @api_view(['GET'])
-def category_detail(request, id):
-    products = models.Product.objects.filter(category_id = id)
+def category_detail(request, slug):
+    products = models.Product.objects.filter(category_slug = slug)
     serializer = serializers.ListProductSerializer(products, many=True)
     return Response(serializer.data)
 
@@ -69,9 +74,9 @@ def create_product_review(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PUT'])
-def update_product_review(request, pk):
+def update_product_review(request, slug):
     try:
-        review = models.ProductReview.objects.get(pk=pk)
+        review = models.ProductReview.objects.get(slug=slug)
     except models.ProductReview.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -97,18 +102,18 @@ def get_active_carts(request):
     return Response(serializer.data)
 
 @api_view(['DELETE'])
-def delete_cart(request, id):
+def delete_cart(request, slug):
     try:
-        cart = models.Cart.objects.get(id=id)
+        cart = models.Cart.objects.get(slug=slug)
     except models.Cart.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     cart.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['PUT'])
-def update_cart_status(request, id):
+def update_cart_status(request, slug):
     try:
-        cart = models.Cart.objects.get(id=id)
+        cart = models.Cart.objects.get(slug=slug)
     except models.Cart.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -118,9 +123,9 @@ def update_cart_status(request, id):
 
 
 @api_view(['GET'])
-def cart_detail(request, id):
+def cart_detail(request, slug):
     try:
-        cart = models.Cart.objects.get(id=id)
+        cart = models.Cart.objects.get(slug=slug)
     except models.Cart.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -137,9 +142,9 @@ def create_cart_product(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PUT'])
-def update_cart_product(request, pk):
+def update_cart_product(request, slug):
     try:
-        cart_product = models.CartProduct.objects.get(pk=pk)
+        cart_product = models.CartProduct.objects.get(slug=slug)
     except models.CartProduct.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -150,9 +155,9 @@ def update_cart_product(request, pk):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
-def delete_cart_product(request, id):
+def delete_cart_product(request, slug):
     try:
-        cart_product = models.CartProduct.objects.get(id=id)
+        cart_product = models.CartProduct.objects.get(slug=slug)
     except models.CartProduct.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -208,3 +213,39 @@ def list_product_reviews(request):
     reviews = models.ProductReview.objects.all()
     serializer = serializers.ListProductReviewSerializer(reviews, many=True)
     return Response(serializer.data)
+
+
+
+
+
+@api_view(['GET'])
+def log_in(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        token, _ = Token.objects.get_or_create(user=user)
+        data = {
+            'token':token.key,
+            'status':status.HTTP_200_OK
+        }
+    else:
+        data = {'status':status.HTTP_404_NOT_FOUND}
+    return Response(data)
+
+
+@api_view(['POST'])
+def register_user(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = User.objects.create_user(username=username, password=password)
+    token = Token.objects.create(user=user)
+    return Response({'username':username,
+                     'token':token.key}
+                     )
+
+@api_view(['GET'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([custom_permissions.IsSupperUser])
+def list_users(request):
+    return Response({})

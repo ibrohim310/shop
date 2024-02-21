@@ -29,8 +29,8 @@ def category_list(request):
     return render(request, 'category/list.html', {'categorys':categorys})
 
 
-def category_detail(request, id):
-    category = models.Category.objects.get(id=id)
+def category_detail(request, slug):
+    category = models.Category.objects.get(slug=slug)
     products = models.Product.objects.filter(category=category, is_active=True)
     context = {
         'category':category,
@@ -39,15 +39,15 @@ def category_detail(request, id):
     return render(request, 'category/list.html', context)
 
 
-def category_update(request, id):
-    category = models.Category.objects.get(id=id)
+def category_update(request, slug):
+    category = models.Category.objects.get(slug=slug)
     category.name = request.POST['name']
     category.save()
-    return redirect('category_detail', category.id)
+    return redirect('category_detail', category.slug)
 
 
-def category_delete(request, id):
-    category = models.Category.objects.get(id=id)
+def category_delete(request, slug):
+    category = models.Category.objects.get(slug=slug)
     category.delete()
     return redirect('dashb:category_list')
 
@@ -88,8 +88,8 @@ def categorys(request):
     return render(request, 'dashb/category/list.html', {'categorys':categorys})
 
 
-def category_update(request, id):
-    category = models.Category.objects.get(id=id)
+def category_update(request, slug):
+    category = models.Category.objects.get(slug=slug)
     if request.method == 'POST':
         category.name = request.POST['name']
         category.save()
@@ -97,8 +97,8 @@ def category_update(request, id):
     return render(request, 'dashb/category/update.html', {'category':category})
 
 
-def category_delete(request, id):
-    category = models.Category.objects.get(id=id)
+def category_delete(request, slug):
+    category = models.Category.objects.get(slug=slug)
     category.delete()
     return redirect('category_list')
 
@@ -138,7 +138,7 @@ def product_create(request):
         price = request.POST['price']
         currency = request.POST['currency']
         baner_image = request.FILES['baner_image']
-        category_id = request.POST['category_id']
+        category_slug = request.POST['category_slug']
         images = request.FILES.getlist('images')
         product = models.Product.objects.create(
             name=name,
@@ -147,7 +147,7 @@ def product_create(request):
             price=price,
             currency=currency,
             baner_image=baner_image,
-            category_id=category_id
+            category_slug=category_slug
         )
         for image in images:
             models.ProductImage.objects.create(
@@ -192,10 +192,10 @@ def products(request):
 
 
 
-def product_update(request, id):
-    product = models.Product.objects.get(id=id)
+def product_update(request, slug):
+    product = models.Product.objects.get(slug=slug)
     if request.method == 'POST':
-        category = models.Category.objects.get(id=request.POST['category_id'])
+        category = models.Category.objects.get(id=request.POST['category_slug'])
         product.name = request.POST['name']
         product.description=request.POST['description']
         product.quantity = request.POST['quantity']
@@ -217,8 +217,8 @@ def product_update(request, id):
     return render(request, 'dashb/items/update.html', context)
 
 
-def product_delete(request, id):
-    models.Product.objects.get(id=id).delete()
+def product_delete(request, slug):
+    models.Product.objects.get(slug=slug).delete()
     return redirect('items')
 
 
@@ -250,8 +250,8 @@ def sign_out(request):
     return redirect('index')
 
 
-def product_detail(request, id):
-    product = models.Product.objects.get(id=id)
+def product_detail(request, slug):
+    product = models.Product.objects.get(slug=slug)
     enters = models.EnterProduct.objects.filter(product=product)
     outs = models.CartProduct.objects.filter(product=product, card__is_active=False)
     query_set = sorted(
@@ -272,7 +272,7 @@ def product_detail(request, id):
 
 def create_enter(request):
     if request.method == 'POST':
-        product_id = request.POST['product_id']
+        product_id = request.POST['product_slug']
         quantity = int(request.POST['quantity'])
         models.EnterProduct.objects.create(
             product_id=product_id,
@@ -282,17 +282,17 @@ def create_enter(request):
     return render(request, 'dashb/enter/create.html', {'products':models.Product.objects.all()})
 
 
-def update_enter(request, id):
+def update_enter(request, slug):
     if request.method == 'POST':
         quantity = int(request.POST['quantity'])
-        enter = models.EnterProduct.objects.get(id=id)
+        enter = models.EnterProduct.objects.get(slug=slug)
         enter.quantity = quantity
         enter.save()
     return redirect('dashb:list_enter')
 
 
-def delete_enter(request, id):
-    models.EnterProduct.objects.get(id=id).delete()
+def delete_enter(request, slug):
+    models.EnterProduct.objects.get(slug=slug).delete()
     return redirect('dashb:list_enter')
 
 #def list_enter(request):
